@@ -99,14 +99,14 @@ This will store metric values to the database. You'll need to add calls to gener
 runs at a scheduled interval (like a cron rake task), to ensure metrics are generated correctly. Don't worry
 about the frequency of your runs, Bodhi won't generate duplicate metrics and will backfill any missing metrics.
 
-### TODO
+## TODO
 
 * Support for blocks passed to helper functions
 * Support for parameterized metrics (or metric groups?)
 * Charting and pretty output for metrics.
 * Support for Mongoid or non-ActiveRecord environments
 
-### Contributing
+## Contributing
 
 Feel free to fork and make any changes necessary. If you'd like to contribute back, I'd appreciate a topic
 branch and relevant tests.
