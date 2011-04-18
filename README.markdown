@@ -5,7 +5,7 @@ Bodhi helps you generate simple, straightforward reporting metrics for your Rail
 can generate reports for anything that can be expressed as a value over time with a simple API.
 
 Bodhi works by letting you define what reporting metrics you want to track in a simple initializer
-file, and by 
+file, and by periodically gathering results about those metrics. 
 
 ## Installation
 
