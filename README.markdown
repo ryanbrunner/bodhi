@@ -4,6 +4,9 @@
 Bodhi helps you generate simple, straightforward reporting metrics for your Rails application. You
 can generate reports for anything that can be expressed as a value over time with a simple API.
 
+Bodhi works by letting you define what reporting metrics you want to track in a simple initializer
+file, and by 
+
 ## Installation
 
 ### Rails 3
@@ -15,6 +18,15 @@ Add the following to your Gemfile, and run `bundle install`
 After installing Bodhi, run the following generator and run `rake db:migrate`. This will create
 a table where Bodhi can store past metric values.
 
+     rails generate bodhi:install
+
+Finally, you'll need to put a call to the metric generator in something that will be run at a 
+scheduled interval (a cron rake task is perfect for this). Don't worry about how often it 
+runs, Bodhi will be able to take care of what needs to be run when.
+
+     Bodhi::Metric.generate_all
+
+
 ## Basic Usage
 
 ### Definining Metrics
@@ -24,11 +36,18 @@ Bodhi provides several helpers to cover common metrics that you may want to to t
 
 #### Counting
 
+Counting metrics count the number of a given model in the database. By default, it counts the total
+number in the database at the time of execution, but you can limit this to only items created or 
+updated when the metrics were run.
+
      Metric.count :dogs            # Counts the total number of the 'dogs' model
      Metric.count :dogs, :new      # Counts all new instances of the 'dogs' model
      Metric.count :dogs, :updated  # Counts all updated instances of the 'dogs' model
 
 #### Aggregating by column
+
+You can also aggregate any numerical column using Bodhi. The following examples aggregate an
+integer column:
 
      Metric.average :dogs, :num_puppies  # Calculates the average number of puppies for a given dog
      Metric.sum :dogs, :num_puppies      # Calculates the total number of puppies.
@@ -84,6 +103,7 @@ about the frequency of your runs, Bodhi won't generate duplicate metrics and wil
 
 * Support for blocks passed to helper functions
 * Support for parameterized metrics (or metric groups?)
+* Charting and pretty output for metrics.
 * Support for Mongoid or non-ActiveRecord environments
 
 ### Contributing

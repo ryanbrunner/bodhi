@@ -17,14 +17,16 @@ module Bodhi
     end
 
     def aggregate (*args)
+      options = args.extract_options!
+
       agg_method = args[0]
-      model_name = args[1]
+      options[:model_name] = args[1]
       field = args[2]
 
-      block = get_agg_block(agg_method, field)
+      options[:block] = get_agg_block(agg_method, field)
+      options[:name] ||= "#{options[:model_name]}_#{agg_method}_#{field}"
 
-      define(:model_name => model_name,
-             :block => block )
+      define(options)
     end
 
     protected

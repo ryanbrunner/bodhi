@@ -1,11 +1,13 @@
 module Bodhi
   module CountMetrics
     def count (*args)
-      model_name = args[0]
-      count_type = args[1] || :total
+      options = args.extract_options!
+      options[:model_name] = args[0] if args[0].is_a? Symbol
+      count_type = args[1] || options[:count_type] || :total
+      options[:block] = get_block(count_type)
+      options[:name] ||= "#{options[:model_name]}_count_#{count_type}"
 
-      define(:model_name => model_name,
-             :block => get_block(count_type) )
+      define(options)
     end
 
     protected

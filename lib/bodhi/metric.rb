@@ -5,7 +5,9 @@ module Bodhi
     extend CountMetrics
     extend AggregateMetrics
 
-    @@metrics = []
+    include Enumerable
+
+    @@metrics = {}
 
     def self.define (*args, &block)
       options = args.extract_options!
@@ -14,13 +16,21 @@ module Bodhi
       options[:block] ||= block if block
 
       m = Metric.new (options)
-      @@metrics << m
+      @@metrics[m.name] = m
 
       m
     end
 
+    def self.[] (key)
+      @@metrics[key]
+    end
+
+    def self.all
+      @@metrics.each_value
+    end
+
     def self.generate_all
-      @@metrics.each { |m| m.generate }
+      @@metrics.each_value { |m| m.generate }
     end
 
     attr_accessor :name, :model_name, :block
@@ -32,25 +42,28 @@ module Bodhi
     end
 
     def current
-      for_period 1.day.ago, Time.now
+      @block.call(get_run_opts.merge(:start => Time.now.beginning_of_day, :end => Time.now.end_of_day))
     end
 
-    def for_period (start_date, end_date)
-      # run for the last hour
-      run = get_run_opts
-      run[:start] = start_date
-      run[:end] = end_date
-      
-      {:start => start_date, :end => end_date, :value => @block.call(run)}
+    def for_period (start_date, end_date = Time.now)
+      MetricValue.where("start between ? and ?", start_date, end_date)
     end
 
     def generate
-      last_run = MetricValue.maximum(:end, :conditions => ["metric = '#{self.name}'"]) || Date.yesterday
-      start_date = (last_run + 1.day).beginning_of_day
-      end_date = start_date + 1.day - 1.second
-      value = for_period start_date, end_date
+      # Remove any runs from today 
+      MetricValue.where(:metric => self.name).where("start >= ?", Date.today).destroy_all
 
-      MetricValue.create!(:start => start_date, :end => end_date, :value => value[:value], :metric => self.name)
+      last_run = MetricValue.maximum(:end, :conditions => ["metric = '#{self.name}'"]) || Date.yesterday
+      
+      while last_run < Date.today
+        start_date = (last_run + 1.day).beginning_of_day
+        end_date = start_date + 1.day - 1.second
+        value = @block.call(get_run_opts.merge(:start => start_date, :end => end_date))
+
+        MetricValue.create!(:start => start_date, :end => end_date, :value => value, :metric => self.name)
+
+        last_run = start_date
+      end
     end
 
     private
