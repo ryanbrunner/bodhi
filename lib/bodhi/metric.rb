@@ -46,7 +46,7 @@ module Bodhi
     end
 
     def for_period (start_date, end_date = Time.now)
-      MetricValue.where("start between ? and ?", start_date, end_date)
+      MetricValue.where(:metric => @name).where("start between ? and ?", start_date, end_date)
     end
 
     def generate

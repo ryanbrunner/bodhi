@@ -6,15 +6,23 @@ module Bodhi
       metric = Bodhi::Metric[args[0]]
       start_date = options[:start] || 1.month.ago
       end_date = options[:end] || Time.now
+      width = options[:width] || "500px"
+      height = options[:height] || "200px"
 
-      container_div(metric, start_date, end_date).html_safe
+      chart_tag(metric, start_date, end_date, {:width => width, :height => height}).html_safe
     end
 
     private
-      def container_div(metric, start_date, end_date)
-        values = metric.for_period(start_date, end_date).map { |v| v.value }.join(",")
+      def chart_tag(metric, start_date, end_date, data_params)
+        values = metric.for_period(start_date, end_date)
+        data_string = data_params.map{ |k,v| "data-#{k}='#{v}'" }.join(" ")
 
-        "<div data-metric='#{metric.name}' data-metric-data='#{values}'></div>"
+        res = "<table class='bodhi-chart' data-metric='#{metric.name}' #{data_string} >"
+        values.each do |v|
+          res += "<tr><th>#{v.start.strftime("%Y-%m-%d")}</th><td>#{v.value}</td></tr>"
+        end
+        res += "</table>"
+        res
       end
 
   end
