@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
      "lib/bodhi/definitions/aggregate.rb",
      "lib/bodhi/definitions/count.rb",
      "lib/bodhi/storage/metric_value.rb",
+     "lib/bodhi/helpers/bodhi_helpers.rb",
      "spec/support/mock_model.rb",
      "spec/support/persistence_spec.rb",
      "spec/aggregate_metrics_spec.rb",
